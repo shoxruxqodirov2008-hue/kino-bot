@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KinoBot</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--tg-theme-bg-color, #151515);
+      color: var(--tg-theme-text-color, white);
+      padding: 20px;
+      text-align: center;
+    }
+    h2 { margin-top: 20px; }
+    button, input {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 15px;
+      margin-top: 12px;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+    button {
+      border: none;
+      background: #2481cc;
+      color: white;
+      cursor: pointer;
+    }
+    input {
+      border: 1px solid #888;
+      background: var(--tg-theme-secondary-bg-color, #292929);
+      color: var(--tg-theme-text-color, white);
+    }
+    #searchBox, #suggestBox { display: none; }
+  </style>
+</head>
+<body>
+  <h2>🎬 KinoBot</h2>
+  <p>Kerakli bo‘limni tanlang</p>
+
+  <button onclick="showBox('suggestBox')">💡 Taklif berish</button>
+  <button onclick="showBox('searchBox')">🔎 Kino izlash</button>
+
+  <div id="suggestBox">
+    <h3>Qaysi kinoni ko‘rmoqchisiz?</h3>
+    <input id="suggestion" placeholder="Kino nomini yozing">
+    <button onclick="sendMovie('suggestion','suggest')">Taklifni yuborish</button>
+  </div>
+
+  <div id="searchBox">
+    <h3>Qaysi kinoni izlayapsiz?</h3>
+    <input id="movie" placeholder="Kino nomini yozing">
+    <button onclick="sendMovie('movie','search')">Kino izlash</button>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    function showBox(id) {
+      document.getElementById('suggestBox').style.display = 'none';
+      document.getElementById('searchBox').style.display = 'none';
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function sendMovie(inputId, action) {
+      const field = document.getElementById(inputId);
+      const name = field.value.trim();
+
+      if (!name) {
+        alert('Iltimos, kino nomini yozing!');
+        return;
+      }
+
+      if (tg.initData) {
+        tg.sendData(JSON.stringify({
+          action: action,
+          movie: name
+        }));
+      } else {
+        alert('Bu funksiya Telegram ichida ochilganda ishlaydi.');
+      }
+    }
+  </script>
+</body>
+</html>
