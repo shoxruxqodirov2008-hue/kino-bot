@@ -14,7 +14,6 @@
       padding: 20px;
       text-align: center;
     }
-    h2 { margin-top: 20px; }
     button, input {
       box-sizing: border-box;
       width: 100%;
@@ -56,35 +55,58 @@
     <button onclick="sendMovie('movie','search')">Kino izlash</button>
   </div>
 
+  <p id="result"></p>
+
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
 
+    const API = 'https://kino-bot-mlm9.onrender.com';
+
     function showBox(id) {
       document.getElementById('suggestBox').style.display = 'none';
       document.getElementById('searchBox').style.display = 'none';
       document.getElementById(id).style.display = 'block';
+      document.getElementById('result').textContent = '';
     }
 
-    function sendMovie(inputId, action) {
+    async function sendMovie(inputId, action) {
       const field = document.getElementById(inputId);
       const name = field.value.trim();
+      const result = document.getElementById('result');
 
       if (!name) {
-        alert('Iltimos, kino nomini yozing!');
+        result.textContent = 'Iltimos, kino nomini yozing!';
         return;
       }
 
-      if (tg.initData) {
-        tg.sendData(JSON.stringify({
-          action: action,
-          movie: name
-        }));
-      } else {
-        alert('Bu funksiya Telegram ichida ochilganda ishlaydi.');
+      result.textContent = 'Yuborilmoqda...';
+
+      try {
+        const response = await fetch(API + '/api/' + action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            movie: name,
+            initData: tg.initData || ''
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Xatolik yuz berdi.');
+        }
+
+        result.textContent = data.message || 'So‘rov muvaffaqiyatli yuborildi!';
+        field.value = '';
+      } catch (error) {
+        result.textContent = 'Server bilan bog‘lanib bo‘lmadi. Keyinroq urinib ko‘ring.';
       }
     }
   </script>
 </body>
 </html>
+
+
