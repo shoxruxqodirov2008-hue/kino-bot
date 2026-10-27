@@ -40,7 +40,7 @@ def suggest():
         return "", 204
 
     data = request.get_json(silent=True) or {}
-    movie = str(data.get("movie", "")).strip()
+    movie = str(data.get("title") or data.get("movie") or "").strip()
 
     if not movie:
         return jsonify({"message": "Kino nomini kiriting."}), 400
@@ -73,21 +73,18 @@ def search():
         return "", 204
 
     data = request.get_json(silent=True) or {}
-    query = str(data.get("movie", "")).strip()
+    query = str(data.get("query") or data.get("movie") or "").strip()
 
     if not query:
         return jsonify({"message": "Kino nomini kiriting."}), 400
 
-    matches = [m for m in MOVIES if query.casefold() in m.casefold()]
+    results = [
+        {"title": m}
+        for m in MOVIES
+        if query.casefold() in m.casefold()
+    ]
 
-    if matches:
-        return jsonify({
-            "message": "Topilgan kinolar: " + ", ".join(matches)
-        })
-
-    return jsonify({
-        "message": "Bu kino namunaviy ro‘yxatda topilmadi."
-    })
+    return jsonify({"results": results})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
