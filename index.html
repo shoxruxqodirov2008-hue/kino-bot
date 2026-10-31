@@ -99,7 +99,57 @@
           throw new Error(data.message || 'Xatolik yuz berdi.');
         }
 
-        result.textContent = data.message || 'So‘rov muvaffaqiyatli yuborildi!';
+       if (action === 'search') {
+  result.replaceChildren();
+
+  if (data.results && data.results.length > 0) {
+    data.results.forEach(movie => {
+      const card = document.createElement('div');
+
+      card.style.cssText = `
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 14px;
+        padding: 15px;
+        margin: 12px 0;
+        text-align: center;
+      `;
+
+      const title = document.createElement('div');
+      title.textContent = movie.title;
+      title.style.cssText = `
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 12px;
+      `;
+
+      const button = document.createElement('a');
+      button.href = movie.url;
+      button.target = '_blank';
+      button.rel = 'noopener noreferrer';
+      button.textContent = '🎬 TOMOSHA QILISH';
+      button.style.cssText = `
+        display: block;
+        background: linear-gradient(135deg, #6c5ce7, #4834d4);
+        color: white;
+        padding: 13px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 14px;
+      `;
+
+      card.appendChild(title);
+      card.appendChild(button);
+      result.appendChild(card);
+    });
+  } else {
+    result.textContent = 'Kino topilmadi.';
+  }
+} else {
+  result.textContent = data.message || 'So‘rov muvaffaqiyatli yuborildi!';
+}
         field.value = '';
       } catch (error) {
         result.textContent = 'Server bilan bog‘lanib bo‘lmadi. Keyinroq urinib ko‘ring.';
