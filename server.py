@@ -1,4 +1,3 @@
-
 import os
 import requests
 from flask import Flask, jsonify, request
@@ -20,6 +19,11 @@ MOVIES = [
     "Home Alone",
 ]
 
+
+def fail(text, code):
+    return jsonify({"ok": False, "error": text}), code
+
+
 @app.after_request
 def add_cors(response):
     response.headers["Access-Control-Allow-Origin"] = SITE_URL
@@ -27,12 +31,14 @@ def add_cors(response):
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     return response
 
+
 @app.route("/")
 def home():
     return jsonify({
         "status": "success",
         "message": "KinoBot serveri ishlayapti!"
     })
+
 
 @app.route("/api/suggest", methods=["POST", "OPTIONS"])
 def suggest():
@@ -43,10 +49,10 @@ def suggest():
     movie = str(data.get("title") or data.get("movie") or "").strip()
 
     if not movie:
-        return jsonify({"message": "Kino nomini kiriting."}), 400
+        return fail("Kino nomini kiriting.", 400)
 
     if not BOT_TOKEN or not OWNER_ID:
-        return jsonify({"message": "Server sozlamalari hali tugallanmagan."}), 503
+        return fail("Server sozlamalari hali tugallanmagan.", 503)
 
     text = "💡 Yangi kino taklifi:\n🎬 " + movie
 
@@ -60,12 +66,13 @@ def suggest():
         result = r.json()
 
         if not result.get("ok"):
-            return jsonify({"message": "Telegram xabarni yubora olmadi."}), 502
+            return fail("Telegram xabarni yubora olmadi.", 502)
 
-        return jsonify({"message": "Taklif sizga yuborildi! Rahmat."})
+        return jsonify({"ok": True, "message": "Taklif sizga yuborildi! Rahmat."})
     except requests.RequestException:
         app.logger.exception("Telegram xabarini yuborishda xatolik")
-        return jsonify({"message": "Xabar yuborilmadi. Keyinroq urinib ko‘ring."}), 502
+        return fail("Xabar yuborilmadi. Keyinroq urinib ko‘ring.", 502)
+
 
 @app.route("/api/search", methods=["POST", "OPTIONS"])
 def search():
@@ -76,7 +83,7 @@ def search():
     query = str(data.get("query") or data.get("movie") or "").strip()
 
     if not query:
-        return jsonify({"message": "Kino nomini kiriting."}), 400
+        return fail("Kino nomini kiriting.", 400)
 
     results = [
         {"title": m}
@@ -84,9 +91,9 @@ def search():
         if query.casefold() in m.casefold()
     ]
 
-    return jsonify({"results": results})
+    return jsonify({"ok": True, "results": results})
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
